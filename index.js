@@ -23,7 +23,7 @@ app.post("/create", async (req, res) => {
   const data = req.body;
 
   await inventoryItems.set({
-    ID: data.ID,
+    ID: generatedUUID,
     itemName : data.itemName,
     categories : data.categories,
     stock : data.stock,
@@ -52,14 +52,13 @@ app.get("/items", async (req,res) => {
 Here we are getting an item with a specific ID.
 */
 app.get("/items/:itemID", async (req,res) => {
-  const inventoryItems = db.collection("Inventory");
-  const inventoryDocs = await inventoryItems.where("ID", "==", req.params.itemID).get();
-  let inventoryItemsArray = [];
-  inventoryDocs.forEach(doc => {
-    inventoryItemsArray.push(doc.data());
-  })
-
-  res.send(inventoryItemsArray);
+  const inventoryItems = db.collection("Inventory").doc(req.params.itemID);
+  const doc = await inventoryItems.get();
+  if(!doc.exists) {
+    res.status(404).send("No Such Item Exists in the Inventory");
+  } else {
+    res.send(doc.data());
+  }
 
 
 });
@@ -68,17 +67,25 @@ app.get("/items/:itemID", async (req,res) => {
 
 app.put("/items/updateItem/:itemID", async (req,res) => {
 
-  // const data = req.body;
-  // const inventoryItems = db.collection("Inventory");
-  // const inventoryDocs = await inventoryItems.get();
-  // inventoryDocs.forEach(doc => {
-  //   if(doc.)
-  // })
+  const inventoryItems = db.collection("Inventory").doc(req.params.itemID);
+  const data = req.body;
+  const result = await inventoryItems.update({
+    itemName : data.itemName,
+    categories : data.categories,
+    stock : data.stock,
+    unitPrice : data.unitPrice
+  });
+
+  res.send("Inventory Item Updated Successfully.");
   
 
 });
 
 //Delete
+app.delete("/items/deleteItem/:itemID", async(req, res) => {
+  const result = await db.collection("Inventory").doc(req.params.itemID).delete();
+  res.send("Inventory Item Successfully Removed.");
+});
 
 app.listen(3000, ()=> {
     console.log("Listening on port 3000.");
