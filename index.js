@@ -3,15 +3,10 @@ const express = require("express");
 require('dotenv').config();
 const app = express();
 const { v4: uuidv4 } = require('uuid');
-// const serviceAccount = require("./permissions.js");
 app.use(express.json());
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-// });
-
 
 admin.initializeApp({
-  credential: admin.credential.cert({
+  credential: admin.credential.cert({ 
     type: process.env.TYPE,
     project_id: process.env.PROJECT_ID,
     private_key_id: process.env.PRIVATE_KEY_ID,
