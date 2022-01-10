@@ -3,6 +3,7 @@ const express = require("express");
 require('dotenv').config();
 const app = express();
 const { v4: uuidv4 } = require('uuid');
+const json2csv = require("json2csv").parse;
 app.use(express.json());
 
 admin.initializeApp({
@@ -73,6 +74,30 @@ app.get("/items/:itemID", async (req,res) => {
   } else {
     res.send(doc.data());
   }
+
+
+});
+
+app.get("/data/generateCSV", async (req, res) => {
+  const inventoryItems = db.collection("Inventory");
+  const inventoryDocs = await inventoryItems.get();
+  let inventoryItemsArray = [];
+  inventoryDocs.forEach(doc => {
+    inventoryItemsArray.push(doc.data());
+  });
+
+  let fields = ["Item ID", "Item Name", "Item Categories", "Item Stock", "Unit Price"];
+  const opts = {fields};
+
+  try {
+    const csv = json2csv(inventoryItemsArray, fields);
+    res.attachment('data.csv');
+    res.status(200).send(csv);
+  } catch (err) {
+    console.error(err);
+  }
+
+  
 
 
 });
